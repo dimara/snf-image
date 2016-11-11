@@ -20,19 +20,22 @@ get_img_dev() {
     local letters=( a b c d e f g h e j k l m n )
 
     case $disk_type in
+        # Only the scsi'ish disk types are being treated differently by
+        # the helper VM
+        scsi-generic|scsi-block|scsi-hd|scsi) echo /dev/sd${letters[$idx]};;
         # The helper's root disk is always paravirtual and thus /dev/vda
         # will be occupied.
-        paravirtual) echo /dev/vd${letters[$idx+1]};;
-        scsi-generic|scsi-block|scsi-hd|scsi) echo /dev/sd${letters[$idx]};;
+        *) echo /dev/vd${letters[$idx+1]};;
     esac
 }
 
 get_img_driver() {
     case $disk_type in
-        paravirtual) echo virtio-blk-pci;;
         scsi|scsi-hd) echo scsi-hd;;
         scsi-block) echo scsi-block;;
         scsi-generic) echo scsi-generic;;
+        # This will include paravirtual, ide, ide-hd, etc.
+        *) echo virtio-blk-pci;;
     esac
 }
 
